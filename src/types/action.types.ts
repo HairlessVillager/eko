@@ -8,6 +8,7 @@ export interface Tool<T, R> {
   name: string;
   description: string;
   input_schema: InputSchema;
+  need_vision: boolean;
   execute: (context: ExecutionContext, params: T) => Promise<R>;
   destroy?: (context: ExecutionContext) => void;
 }
