@@ -86,19 +86,6 @@ export class WorkflowGenerator {
 
     const workflowData = response.toolCalls[0].input.workflow as any;
 
-    // Forcibly add special tools
-    const specialTools = [
-      "cancel_workflow",
-      "human_input_text",
-      "human_operate",
-    ]
-    for (const node of workflowData.nodes) {
-      for (const tool of specialTools) {
-        if (!node.action.tools.includes(tool)) {
-          node.action.tools.push(tool);
-        }
-      }
-    }
 
     // Validate all tools exist
     for (const node of workflowData.nodes) {
@@ -115,8 +102,8 @@ export class WorkflowGenerator {
     // debug
     console.log("Debug the workflow...")
     console.log(workflowData);
-    console.log("Debug the workflow...Done")    
-    
+    console.log("Debug the workflow...Done")
+
     return this.createWorkflowFromData(workflowData);
   }
 
