@@ -13,8 +13,10 @@ import {
   WorkflowCallback,
   NodeOutput,
   ExecutionContext,
+  DeepseekConfig,
 } from '../types';
 import { ToolRegistry } from './tool-registry';
+import { DeepseekProvider } from '@/services/llm/deepseek-provider';
 
 /**
  * Eko core
@@ -44,6 +46,13 @@ export class Eko {
           openaiConfig.apiKey,
           openaiConfig.modelName,
           openaiConfig.options
+        );
+      } else if (llmConfig.llm == 'deepseek') {
+        let deepseekConfig = llmConfig as DeepseekConfig;
+        this.llmProvider = new DeepseekProvider(
+          deepseekConfig.apiKey,
+          deepseekConfig.modelName,
+          deepseekConfig.options
         );
       } else {
         let msg: string = 'Unknown parameter: llm > ' + llmConfig['llm'];

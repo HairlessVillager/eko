@@ -17,9 +17,16 @@ export interface OpenaiConfig {
   options?: OpenAiClientOptions;
 }
 
+export interface DeepseekConfig {
+  llm: 'deepseek';
+  apiKey: string;
+  modelName?: string;
+  options?: OpenAiClientOptions;
+}
+
 export type ClaudeApiKey = string;
 
-export type LLMConfig = ClaudeApiKey | ClaudeConfig | OpenaiConfig | LLMProvider;
+export type LLMConfig = ClaudeApiKey | ClaudeConfig | OpenaiConfig | DeepseekConfig | LLMProvider;
 
 export interface EkoConfig {
   workingWindowId?: number,
