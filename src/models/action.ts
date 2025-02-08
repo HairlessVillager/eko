@@ -493,7 +493,8 @@ export class ActionImpl implements Action {
     context.variables.delete(outputKey);
 
     // Get output value, first checking for use_tool_result
-    const outputValue = outputParams.use_tool_result
+    const outputParams_has_use_tool_result: boolean = outputParams && "use_tool_result" in outputParams;
+    const outputValue = outputParams_has_use_tool_result
       ? Array.from(this.toolResults.values()).pop()
       : outputParams?.value;
 
