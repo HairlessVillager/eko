@@ -177,7 +177,7 @@ export class WorkflowParser {
         // Pass tool names as strings, they'll be resolved at execution time
         nodeJson.action.tools || [],
         undefined, // LLM provider will be injected at execution time
-        { maxTokens: 1000 }
+        { maxTokens: 8192 }
       );
 
       const node: WorkflowNode = {

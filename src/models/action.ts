@@ -400,12 +400,16 @@ export class ActionImpl implements Action {
       roundCount++;
       this.logger.log('info', `Starting round ${roundCount} of ${this.maxRounds}`, context);
 
+      console.log(messages);
       const { response, hasToolUse, roundMessages } = await this.executeSingleRound(
         messages,
         params,
         toolMap,
         context
       );
+      console.log(response);
+      console.log(hasToolUse);
+      console.log(roundMessages);
 
       if (response?.textContent) {
         context.callback?.hooks?.onLlmMessage?.(response.textContent);

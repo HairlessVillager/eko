@@ -95,7 +95,7 @@ export class ClaudeProvider implements LLMProvider {
     const response = await this.client.messages.create({
       system,
       model: params.model || this.defaultModel,
-      max_tokens: params.maxTokens || 1024,
+      max_tokens: params.maxTokens || 8192,
       temperature: params.temperature,
       messages: messages.filter((s) => s.role != 'system') as Anthropic.MessageParam[],
       tools: params.tools as Anthropic.Tool[],
@@ -122,7 +122,7 @@ export class ClaudeProvider implements LLMProvider {
     const stream = await this.client.messages.stream({
       system,
       model: params.model || this.defaultModel,
-      max_tokens: params.maxTokens || 4096,
+      max_tokens: params.maxTokens || 8192,
       temperature: params.temperature,
       messages: messages.filter((s) => s.role != 'system') as Anthropic.MessageParam[],
       tools: params.tools as Anthropic.Tool[],
