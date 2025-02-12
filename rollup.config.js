@@ -49,7 +49,7 @@ export default [
         tsconfig: './tsconfig.json',
         declaration: true,
         declarationDir: 'dist',
-        include: ['src/types/*', 'src/extension/**/*', 'src/universal_tools/**/*'],
+        include: ['src/common/**/*', 'src/types/*', 'src/extension/**/*', 'src/universal_tools/**/*'],
         exclude: ['src/extension/script']
       }),
       copy({
@@ -115,7 +115,7 @@ export default [
         tsconfig: './tsconfig.json',
         declaration: true,
         declarationDir: 'dist',
-        include: ['src/types/*', 'src/nodejs/**/*', 'src/universal_tools/**/*']
+        include: ['src/common/**/*', 'src/types/*', 'src/nodejs/**/*', 'src/universal_tools/**/*']
       })
     ]
   },
@@ -135,7 +135,7 @@ export default [
         tsconfig: './tsconfig.json',
         declaration: true,
         declarationDir: 'dist',
-        include: ['src/types/*', 'src/nodejs/**/*', 'src/universal_tools/**/*']
+        include: ['src/common/**/*', 'src/types/*', 'src/nodejs/**/*', 'src/universal_tools/**/*']
       }),
       replace({
         preventAssignment: true,
