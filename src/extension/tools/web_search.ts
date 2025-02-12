@@ -153,7 +153,7 @@ async function deepSearch(
   let searchInfo = await doPageContent(context, taskId, detailLinkGroups, windowId);
   console.log('searchInfo: ', searchInfo);
   // close window
-  closeWindow && chrome.windows.remove(windowId);
+  closeWindow && getChromeProxy().windows.remove(windowId);
   return searchInfo;
 }
 
