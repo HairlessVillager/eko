@@ -9,7 +9,6 @@ let ChromeProxy: any = chrome;
  * @example
  * ```typescript
  * class MyChromeProxy {
- *   chrome.events.Event<(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => void>.removeListener(callback: (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => void): void
  *   public static tabs_onUpdated_removeListener(callback: (tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => void): void {
  *     console.log(callback);
  *     return chrome.tabs.onUpdated.removeListener(callback);
