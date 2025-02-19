@@ -166,9 +166,17 @@ export class ActionImpl implements Action {
 
         // Store the promise of tool execution
         toolExecutionPromise = (async () => {
+          console.log("toolExecutionPromise()...");
+          console.log(`context.callback: ${context.callback}`);
+          if (context.callback) {
+            console.log(`context.callback.hooks.beforeToolUse: ${context.callback.hooks.beforeToolUse}`);
+            console.log(`context.callback.hooks.afterToolUse: ${context.callback.hooks.afterToolUse}`);
+          }
           try {
             // beforeToolUse
+            console.log("beforeToolUse");
             context.__skip = false;
+            console.log("if #1");
             if (context.callback && context.callback.hooks.beforeToolUse) {
               let modified_input = await context.callback.hooks.beforeToolUse(
                 tool,
@@ -179,6 +187,7 @@ export class ActionImpl implements Action {
                 toolCall.input = modified_input;
               }
             }
+            console.log("if #2");
             if (context.__skip || context.__abort || context.signal?.aborted) {
               toolResultMessage = {
                 role: 'user',
@@ -193,8 +202,11 @@ export class ActionImpl implements Action {
               return;
             }
             // Execute the tool
+            console.log("Execute the tool...");
             let result = await tool.execute(context, toolCall.input);
+            console.log("Execute the tool...done");
             // afterToolUse
+            console.log("afterToolUse");
             if (context.callback && context.callback.hooks.afterToolUse) {
               let modified_result = await context.callback.hooks.afterToolUse(
                 tool,
@@ -206,7 +218,9 @@ export class ActionImpl implements Action {
               }
             }
 
+            console.log("set result_has_image...");
             const result_has_image: boolean = result && result.image;
+            console.log("set resultContent...");
             const resultContent =
               result_has_image
                 ? {
@@ -224,12 +238,14 @@ export class ActionImpl implements Action {
                     tool_use_id: toolCall.id,
                     content: [{ type: 'text', text: JSON.stringify(result) }],
                   };
+            console.log("set resultContentText...");
             const resultContentText =
               result_has_image
                 ? result.text
                   ? result.text + ' [Image]'
                   : '[Image]'
                 : JSON.stringify(result);
+            console.log("set resultMessage...");
             const resultMessage: Message = {
               role: 'user',
               content: [resultContent],
@@ -258,6 +274,7 @@ export class ActionImpl implements Action {
             toolResultMessage = errorResult;
             this.logger.logError(err as Error, context);
           }
+          console.log("toolExecutionPromise()...done");
         })();
       },
       onComplete: (llmResponse) => {
