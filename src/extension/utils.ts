@@ -1,18 +1,23 @@
 import { ExecutionContext } from '../types/action.types';
 
 export async function getWindowId(context: ExecutionContext): Promise<number> {
+  // TODO: refactor this function for incomplete return type safety
   let windowId = context.variables.get('windowId') as any;
   if (windowId) {
+    console.log("context.variables has windowId");
     try {
       await chrome.windows.get(windowId);
     } catch (e) {
+      console.warn("windowId is invalid");
       windowId = null;
       context.variables.delete('windowId');
       let tabId = context.variables.get('tabId') as any;
       if (tabId) {
+        console.log("context.variables has tabId");
         try {
           let tab = await chrome.tabs.get(tabId);
           windowId = tab.windowId;
+          console.log("get windowId successfully by tabId");
         } catch (e) {
           context.variables.delete('tabId');
         }
@@ -20,10 +25,15 @@ export async function getWindowId(context: ExecutionContext): Promise<number> {
     }
   }
   if (!windowId) {
+    console.log("cannot get windowId by context.variables, try to get windowId by chrome.windows.getCurrent()");
     const window = await chrome.windows.getCurrent();
     windowId = window.id;
+    console.log(`window.id=${window.id}`);
   }
-  return windowId as number;
+  if (!windowId) {
+    throw Error("cannot get windowId");
+  }
+  return windowId;
 }
 
 export async function getTabId(context: ExecutionContext): Promise<number> {
