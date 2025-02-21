@@ -137,11 +137,13 @@ async function deepSearch(
   let closeWindow = false;
   if (!windowId) {
     // open new window
+    console.log("kyf: getChromeProxy().windows.create()...");
     let window = await getChromeProxy().windows.create({
       type: 'normal',
       state: 'maximized',
       url: null,
     } as any as chrome.windows.CreateData);
+    console.log("kyf: getChromeProxy().windows.create()...done");
     windowId = window.id;
     closeWindow = true;
   }
