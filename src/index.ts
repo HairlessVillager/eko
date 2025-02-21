@@ -5,7 +5,7 @@ import { OpenaiProvider } from './services/llm/openai-provider';
 import { WorkflowParser } from './services/parser/workflow-parser';
 import { WorkflowGenerator } from "./services/workflow/generator"
 import { ExecutionLogger } from './utils/execution-logger';
-import { setChromeProxy, getChromeProxy } from './common/chrome/proxy';
+import { ChromeProxyHolder } from './common/chrome/proxy';
 
 export default Eko;
 
@@ -17,6 +17,5 @@ export {
   ToolRegistry,
   WorkflowParser,
   ExecutionLogger,
-  setChromeProxy,
-  getChromeProxy,
+  ChromeProxyHolder,
 }

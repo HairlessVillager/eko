@@ -2,7 +2,7 @@ import { ExportFileParam } from '../../types/tools.types';
 import { Tool, InputSchema, ExecutionContext } from '../../types/action.types';
 import { getTabId, open_new_tab, sleep } from '../utils';
 import { exportFile } from './html_script';
-import { getChromeProxy } from '@/common/chrome/proxy';
+import { ChromeProxyHolder } from '@/common/chrome/proxy';
 
 /**
  * Export file
@@ -98,7 +98,7 @@ export class ExportFile implements Tool<ExportFileParam, unknown> {
         args: [filename, type, params.content],
       });
       await sleep(5000);
-      await getChromeProxy().tabs.remove(tabId);
+      await ChromeProxyHolder.getChromeProxy()().tabs.remove(tabId);
     }
     return { success: true };
   }

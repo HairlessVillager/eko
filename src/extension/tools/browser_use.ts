@@ -2,7 +2,7 @@ import { BrowserUseParam, BrowserUseResult } from '../../types/tools.types';
 import { Tool, InputSchema, ExecutionContext } from '../../types/action.types';
 import { getWindowId, getTabId, sleep, injectScript, executeScript } from '../utils';
 import * as browser from './browser';
-import { getChromeProxy } from '@/common/chrome/proxy';
+import { ChromeProxyHolder } from '@/common/chrome/proxy';
 
 /**
  * Browser Use for general
@@ -142,7 +142,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           await sleep(500);
           break;
         case 'extract_content':
-          let tab = await getChromeProxy().tabs.get(tabId);
+          let tab = await ChromeProxyHolder.getChromeProxy()().tabs.get(tabId);
           await injectScript(tabId);
           await sleep(200);
           let content = await executeScript(tabId, () => {
