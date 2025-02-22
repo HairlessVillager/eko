@@ -1,6 +1,7 @@
 import { WebSearchParam, WebSearchResult } from '../../types/tools.types';
 import { Tool, InputSchema, ExecutionContext } from '../../types/action.types';
 import { MsgEvent, CountDownLatch, sleep, injectScript } from '../utils';
+import { createChromeApiProxy } from '@/common/chrome/proxy';
 
 /**
  * Web Search
@@ -136,7 +137,7 @@ async function deepSearch(
   let closeWindow = false;
   if (!windowId) {
     // open new window
-    let window = await chrome.windows.create({
+    let window = await context.ekoConfig.chromeProxy.windows.create({
       type: 'normal',
       state: 'maximized',
       url: null,
