@@ -13,7 +13,6 @@ import {
   sleep,
   waitForTabComplete,
 } from '../utils';
-import { ChromeProxyHolder } from '@/common/chrome/proxy';
 
 /**
  * Browser tab management
@@ -69,7 +68,7 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
     let result: TabManagementResult;
     if (command == 'tab_all') {
       result = [];
-      let tabs = await ChromeProxyHolder.getChromeProxy()().tabs.query({ windowId: windowId });
+      let tabs = await chrome.tabs.query({ windowId: windowId });
       for (let i = 0; i < tabs.length; i++) {
         let tab = tabs[i];
         let tabInfo: TabInfo = {
@@ -85,26 +84,26 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
       }
     } else if (command == 'current_tab') {
       let tabId = await getTabId(context);
-      let tab = await ChromeProxyHolder.getChromeProxy()().tabs.get(tabId);
+      let tab = await chrome.tabs.get(tabId);
       let tabInfo: TabInfo = { tabId, windowId: tab.windowId, title: tab.title, url: tab.url };
       result = tabInfo;
     } else if (command == 'go_back') {
       let tabId = await getTabId(context);
-      await ChromeProxyHolder.getChromeProxy()().tabs.goBack(tabId);
-      let tab = await ChromeProxyHolder.getChromeProxy()().tabs.get(tabId);
+      await chrome.tabs.goBack(tabId);
+      let tab = await chrome.tabs.get(tabId);
       let tabInfo: TabInfo = { tabId, windowId: tab.windowId, title: tab.title, url: tab.url };
       result = tabInfo;
     } else if (command == 'close_tab') {
       let closedTabId = await getTabId(context);
-      await ChromeProxyHolder.getChromeProxy()().tabs.remove(closedTabId);
+      await chrome.tabs.remove(closedTabId);
       await sleep(100);
-      let tabs = await ChromeProxyHolder.getChromeProxy()().tabs.query({ active: true, currentWindow: true });
+      let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tabs.length == 0) {
-        tabs = await ChromeProxyHolder.getChromeProxy()().tabs.query({ status: 'complete', currentWindow: true });
+        tabs = await chrome.tabs.query({ status: 'complete', currentWindow: true });
       }
       let tab = tabs[tabs.length - 1];
       if (!tab.active) {
-        await ChromeProxyHolder.getChromeProxy()().tabs.update(tab.id as number, { active: true });
+        await chrome.tabs.update(tab.id as number, { active: true });
       }
       let newTabId = tab.id;
       context.variables.set('tabId', tab.id);
@@ -113,7 +112,7 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
       result = closeTabInfo;
     } else if (command.startsWith('switch_tab')) {
       let tabId = parseInt(command.replace('switch_tab', '').replace('[', '').replace(']', ''));
-      let tab = await ChromeProxyHolder.getChromeProxy()().tabs.update(tabId, { active: true });
+      let tab = await chrome.tabs.update(tabId, { active: true });
       context.variables.set('tabId', tab.id);
       context.variables.set('windowId', tab.windowId);
       let tabInfo: TabInfo = { tabId, windowId: tab.windowId, title: tab.title, url: tab.url };
@@ -121,7 +120,7 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
     } else if (command.startsWith('change_url')) {
       let url = command.substring('change_url'.length).replace('[', '').replace(']', '').trim();
       let tabId = await getTabId(context);
-      // await ChromeProxyHolder.getChromeProxy()().tabs.update(tabId, { url: url });
+      // await chrome.tabs.update(tabId, { url: url });
       await executeScript(tabId, () => {
         location.href = url;
       }, []);
@@ -170,7 +169,7 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
     let windowIds = context.variables.get('windowIds') as Array<number>;
     if (windowIds) {
       for (let i = 0; i < windowIds.length; i++) {
-        ChromeProxyHolder.getChromeProxy()().windows.remove(windowIds[i]);
+        chrome.windows.remove(windowIds[i]);
       }
     }
   }

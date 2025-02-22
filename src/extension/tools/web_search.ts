@@ -1,7 +1,6 @@
 import { WebSearchParam, WebSearchResult } from '../../types/tools.types';
 import { Tool, InputSchema, ExecutionContext } from '../../types/action.types';
 import { MsgEvent, CountDownLatch, sleep, injectScript } from '../utils';
-import { ChromeProxyHolder } from '@/common/chrome/proxy';
 
 /**
  * Web Search
@@ -116,7 +115,7 @@ function buildDeepSearchUrl(url: string, keyword: string) {
 
 // Event
 const tabsUpdateEvent = new MsgEvent();
-ChromeProxyHolder.getChromeProxy().tabs.onUpdated.addListener(async function (tabId: any, changeInfo: any, tab: any) {
+chrome.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
   await tabsUpdateEvent.publish({ tabId, changeInfo, tab });
 });
 
@@ -137,13 +136,11 @@ async function deepSearch(
   let closeWindow = false;
   if (!windowId) {
     // open new window
-    console.log("kyf: ChromeProxyHolder.getChromeProxy().windows.create()...");
-    let window = await ChromeProxyHolder.getChromeProxy().windows.create({
+    let window = await chrome.windows.create({
       type: 'normal',
       state: 'maximized',
       url: null,
     } as any as chrome.windows.CreateData);
-    console.log("kyf: ChromeProxyHolder.getChromeProxy().windows.create()...done");
     windowId = window.id;
     closeWindow = true;
   }
@@ -155,7 +152,7 @@ async function deepSearch(
   let searchInfo = await doPageContent(context, taskId, detailLinkGroups, windowId);
   console.log('searchInfo: ', searchInfo);
   // close window
-  closeWindow && ChromeProxyHolder.getChromeProxy().windows.remove(windowId);
+  closeWindow && chrome.windows.remove(windowId);
   return searchInfo;
 }
 
@@ -200,7 +197,7 @@ async function doDetailLinkGroups(
           await sleep(1000);
           // crawler the search page details page
           // { links: [{ title, url }] }
-          let detailLinks: any = await ChromeProxyHolder.getChromeProxy().tabs.sendMessage(tab.id as number, {
+          let detailLinks: any = await chrome.tabs.sendMessage(tab.id as number, {
             type: 'page:getDetailLinks',
             keyword: searchs[i].keyword,
           });
@@ -212,10 +209,10 @@ async function doDetailLinkGroups(
           let links = detailLinks.links.slice(0, detailsMaxNum);
           detailLinkGroups.push({ url, links, filename });
           countDownLatch.countDown();
-          ChromeProxyHolder.getChromeProxy().tabs.remove(tab.id as number);
+          chrome.tabs.remove(tab.id as number);
         } else if (obj.changeInfo.status === 'unloaded') {
           countDownLatch.countDown();
-          ChromeProxyHolder.getChromeProxy().tabs.remove(tab.id as number);
+          chrome.tabs.remove(tab.id as number);
           tabsUpdateEvent.removeListener(eventId);
         }
       }, eventId);
@@ -263,7 +260,7 @@ async function doPageContent(
     for (let j = 0; j < links.length; j++) {
       let link = links[j];
       // open new tab
-      let tab = await ChromeProxyHolder.getChromeProxy().tabs.create({
+      let tab = await chrome.tabs.create({
         url: link.url,
         windowId,
       });
@@ -288,7 +285,7 @@ async function doPageContent(
               await injectScript(tab.id as number, filename);
               await sleep(1000);
 
-              let result: any = await ChromeProxyHolder.getChromeProxy().tabs.sendMessage(tab.id as number, {
+              let result: any = await chrome.tabs.sendMessage(tab.id as number, {
                 type: 'page:getContent',
               });
 
@@ -305,13 +302,13 @@ async function doPageContent(
             } finally {
               searchInfo.running--;
               countDownLatch.countDown();
-              ChromeProxyHolder.getChromeProxy().tabs.remove(tab.id as number);
+              chrome.tabs.remove(tab.id as number);
               tabsUpdateEvent.removeListener(eventId);
             }
           } else if (obj.changeInfo.status === 'unloaded') {
             searchInfo.running--;
             countDownLatch.countDown();
-            ChromeProxyHolder.getChromeProxy().tabs.remove(tab.id as number);
+            chrome.tabs.remove(tab.id as number);
             tabsUpdateEvent.removeListener(eventId);
             reject(new Error('Tab unloaded')); // Reject if the tab is unloaded
           }
@@ -327,7 +324,7 @@ async function doPageContent(
         searchInfo.failed++;
         searchInfo.failedLinks.push(link);
         countDownLatch.countDown();
-        ChromeProxyHolder.getChromeProxy().tabs.remove(tab.id as number); // Clean up tab on failure
+        chrome.tabs.remove(tab.id as number); // Clean up tab on failure
       }
     }
   }

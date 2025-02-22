@@ -1,6 +1,5 @@
 import * as tools from './tools';
 import { Tool } from '../types';
-import { ChromeProxyHolder } from '@/common/chrome/proxy';
 
 export async function pub(tabId: number, event: string, params: any): Promise<any> {
   return await chrome.tabs.sendMessage(tabId as number, {
@@ -16,7 +15,7 @@ export async function getLLMConfig(name: string = 'llmConfig'): Promise<{
   modelName?: string;
   options?: {[key:string]:any};
 } | undefined> {
-  let result = await ChromeProxyHolder.getChromeProxy().storage.sync.get([name]);
+  let result = await chrome.storage.sync.get([name]);
   return result[name];
 }
 

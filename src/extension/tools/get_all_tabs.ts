@@ -1,7 +1,6 @@
 import { BrowserTab } from '../../types/tools.types';
 import { Tool, InputSchema, ExecutionContext } from '../../types/action.types';
 import { getTabId, executeScript, injectScript, sleep } from '../utils';
-import { ChromeProxyHolder } from '@/common/chrome/proxy';
 
 export class GetAllTabs implements Tool<any, BrowserTab[]> {
   name: string;
@@ -18,9 +17,9 @@ export class GetAllTabs implements Tool<any, BrowserTab[]> {
   }
 
   async execute(context: ExecutionContext, params: any): Promise<BrowserTab[]> {
-    const currentWindow = await ChromeProxyHolder.getChromeProxy()().windows.getCurrent();
+    const currentWindow = await chrome.windows.getCurrent();
     const windowId = currentWindow.id;
-    const tabs = await ChromeProxyHolder.getChromeProxy()().tabs.query({ windowId });
+    const tabs = await chrome.tabs.query({ windowId });
     const tabsInfo: BrowserTab[] = [];
   
     for (const tab of tabs) {
