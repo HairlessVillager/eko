@@ -59,6 +59,7 @@ export class Eko {
     } else {
       this.ekoConfig = {
         workingWindowId: undefined,
+        chromeProxy: chrome,
       };
     }
 
