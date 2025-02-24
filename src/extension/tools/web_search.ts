@@ -195,7 +195,7 @@ async function doDetailLinkGroups(
         if (obj.changeInfo.status === 'complete') {
           tabsUpdateEvent.removeListener(eventId);
           // inject js
-          await injectScript(tab.id as number, filename);
+          await injectScript(context.ekoConfig.chromeProxy, tab.id as number, filename);
           await sleep(1000);
           // crawler the search page details page
           // { links: [{ title, url }] }

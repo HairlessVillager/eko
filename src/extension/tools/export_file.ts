@@ -85,9 +85,9 @@ export class ExportFile implements Tool<ExportFileParam, unknown> {
       let tab;
       const url = 'https://www.google.com';
       if (context.ekoConfig.workingWindowId) {
-        tab = await open_new_tab(url, false, context.ekoConfig.workingWindowId);
+        tab = await open_new_tab(context.ekoConfig.chromeProxy, url, false, context.ekoConfig.workingWindowId);
       } else {
-        tab = await open_new_tab(url, true);
+        tab = await open_new_tab(context.ekoConfig.chromeProxy, url, true);
       }
       context.callback?.hooks?.onTabCreated?.(tab.id as number);
       let tabId = tab.id as number;

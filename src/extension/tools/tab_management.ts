@@ -121,10 +121,10 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
       let url = command.substring('change_url'.length).replace('[', '').replace(']', '').trim();
       let tabId = await getTabId(context);
       // await chrome.tabs.update(tabId, { url: url });
-      await executeScript(tabId, () => {
+      await executeScript(context.ekoConfig.chromeProxy, tabId, () => {
         location.href = url;
       }, []);
-      let tab = await waitForTabComplete(tabId);
+      let tab = await waitForTabComplete(context.ekoConfig.chromeProxy, tabId);
       let tabInfo: TabInfo = { tabId, windowId: tab.windowId, title: tab.title, url: tab.url };
       result = tabInfo;
     } else if (command.startsWith('new_tab')) {
@@ -133,11 +133,11 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
       let newWindow = !context.variables.get('windowId') && !context.variables.get('tabId');
       let tab: chrome.tabs.Tab;
       if (newWindow) {
-        tab = await open_new_tab(url, true);
+        tab = await open_new_tab(context.ekoConfig.chromeProxy, url, true);
         context.callback?.hooks?.onTabCreated?.(tab.id as number);
       } else {
         let windowId = await getWindowId(context);
-        tab = await open_new_tab(url, false, windowId);
+        tab = await open_new_tab(context.ekoConfig.chromeProxy, url, false, windowId);
         context.callback?.hooks?.onTabCreated?.(tab.id as number);
       }
       let windowId = tab.windowId as number;

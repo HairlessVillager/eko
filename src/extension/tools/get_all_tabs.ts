@@ -28,9 +28,9 @@ export class GetAllTabs implements Tool<any, BrowserTab[]> {
         continue;
       }
   
-      await injectScript(tab.id);
+      await injectScript(context.ekoConfig.chromeProxy, tab.id);
       await sleep(500);
-      let content = await executeScript(tab.id, () => {
+      let content = await executeScript(context.ekoConfig.chromeProxy, tab.id, () => {
         return eko.extractHtmlContent();
       }, []);
   
