@@ -141,7 +141,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           await sleep(500);
           break;
         case 'extract_content':
-          let tab = await chrome.tabs.get(tabId);
+          let tab = await context.ekoConfig.chromeProxy.tabs.get(tabId);
           await injectScript(tabId);
           await sleep(200);
           let content = await executeScript(tabId, () => {

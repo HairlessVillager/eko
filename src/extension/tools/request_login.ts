@@ -25,7 +25,7 @@ export class RequestLogin implements Tool<any, any> {
     let tabId = await getTabId(context);
     let task_id = 'login_required_' + tabId;
     const request_user_help = async () => {
-      await chrome.tabs.sendMessage(tabId, {
+      await context.ekoConfig.chromeProxy.tabs.sendMessage(tabId, {
         type: 'request_user_help',
         task_id,
         failure_type: 'login_required',
@@ -53,6 +53,7 @@ export class RequestLogin implements Tool<any, any> {
         if (!tabExists) {
           clearInterval(checkTabClosedInterval);
           resolve(false);
+          // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
           chrome.runtime.onMessage.removeListener(listener);
         }
       }, 1000);
@@ -62,6 +63,7 @@ export class RequestLogin implements Tool<any, any> {
           clearInterval(checkTabClosedInterval);
         }
       };
+      // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
       chrome.runtime.onMessage.addListener(listener);
     });
   }

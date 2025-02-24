@@ -12,6 +12,7 @@ export async function type(
       coordinate = (await cursor_position(tabId)).coordinate;
     }
     await mouse_move(tabId, coordinate);
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:type',
       text,
@@ -33,6 +34,7 @@ export async function type_by(
 ): Promise<any> {
   console.log('Sending type message to tab:', tabId, { text, xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:type',
       text,
@@ -54,6 +56,7 @@ export async function clear_input(tabId: number, coordinate?: [number, number]):
       coordinate = (await cursor_position(tabId)).coordinate;
     }
     await mouse_move(tabId, coordinate);
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:type',
       text: '',
@@ -74,6 +77,7 @@ export async function clear_input_by(
 ): Promise<any> {
   console.log('Sending clear_input_by message to tab:', tabId, { xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:type',
       text: '',
@@ -91,6 +95,7 @@ export async function clear_input_by(
 export async function mouse_move(tabId: number, coordinate: [number, number]): Promise<any> {
   console.log('Sending mouse_move message to tab:', tabId, { coordinate });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:mouse_move',
       coordinate,
@@ -109,6 +114,7 @@ export async function left_click(tabId: number, coordinate?: [number, number]): 
     if (!coordinate) {
       coordinate = (await cursor_position(tabId)).coordinate;
     }
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:left_click',
       coordinate,
@@ -128,6 +134,7 @@ export async function left_click_by(
 ): Promise<any> {
   console.log('Sending left_click_by message to tab:', tabId, { xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:left_click',
       xpath,
@@ -147,6 +154,7 @@ export async function right_click(tabId: number, coordinate?: [number, number]):
     if (!coordinate) {
       coordinate = (await cursor_position(tabId)).coordinate;
     }
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:right_click',
       coordinate,
@@ -166,6 +174,7 @@ export async function right_click_by(
 ): Promise<any> {
   console.log('Sending right_click_by message to tab:', tabId, { xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:right_click',
       xpath,
@@ -185,6 +194,7 @@ export async function double_click(tabId: number, coordinate?: [number, number])
     if (!coordinate) {
       coordinate = (await cursor_position(tabId)).coordinate;
     }
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:double_click',
       coordinate,
@@ -204,6 +214,7 @@ export async function double_click_by(
 ): Promise<any> {
   console.log('Sending double_click_by message to tab:', tabId, { xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:double_click',
       xpath,
@@ -222,12 +233,14 @@ export async function screenshot(windowId: number, compress?: boolean): Promise<
   try {
     let dataUrl;
     if (compress) {
+      // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
       dataUrl = await chrome.tabs.captureVisibleTab(windowId as number, {
         format: 'jpeg',
         quality: 60, // 0-100
       });
       dataUrl = await compress_image(dataUrl, 0.7, 1);
     } else {
+      // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
       dataUrl = await chrome.tabs.captureVisibleTab(windowId as number, {
         format: 'jpeg',
         quality: 50,
@@ -285,6 +298,7 @@ export async function scroll_to(tabId: number, coordinate: [number, number]): Pr
   console.log('Sending scroll_to message to tab:', tabId, { coordinate });
   try {
     let from_coordinate = (await cursor_position(tabId)).coordinate;
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:scroll_to',
       from_coordinate,
@@ -305,6 +319,7 @@ export async function scroll_to_by(
 ): Promise<any> {
   console.log('Sending scroll_to_by message to tab:', tabId, { xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:scroll_to',
       xpath,
@@ -325,6 +340,7 @@ export async function get_dropdown_options(
 ): Promise<any> {
   console.log('Sending get_dropdown_options message to tab:', tabId, { xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:get_dropdown_options',
       xpath,
@@ -346,6 +362,7 @@ export async function select_dropdown_option(
 ): Promise<any> {
   console.log('Sending select_dropdown_option message to tab:', tabId, { text, xpath, highlightIndex });
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     const response = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:select_dropdown_option',
       text,
@@ -365,6 +382,7 @@ export async function cursor_position(tabId: number): Promise<{
 }> {
   console.log('Sending cursor_position message to tab:', tabId);
   try {
+    // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
     let result: any = await chrome.tabs.sendMessage(tabId, {
       type: 'computer:cursor_position',
     });

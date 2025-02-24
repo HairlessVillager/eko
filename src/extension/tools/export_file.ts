@@ -76,7 +76,7 @@ export class ExportFile implements Tool<ExportFileParam, unknown> {
     }
     try {
       let tabId = await getTabId(context);
-      await chrome.scripting.executeScript({
+      await context.ekoConfig.chromeProxy.scripting.executeScript({
         target: { tabId: tabId as number },
         func: exportFile,
         args: [filename, type, params.content],
@@ -91,13 +91,13 @@ export class ExportFile implements Tool<ExportFileParam, unknown> {
       }
       context.callback?.hooks?.onTabCreated?.(tab.id as number);
       let tabId = tab.id as number;
-      await chrome.scripting.executeScript({
+      await context.ekoConfig.chromeProxy.scripting.executeScript({
         target: { tabId: tabId as number },
         func: exportFile,
         args: [filename, type, params.content],
       });
       await sleep(5000);
-      await chrome.tabs.remove(tabId);
+      await context.ekoConfig.chromeProxy.tabs.remove(tabId);
     }
     return { success: true };
   }

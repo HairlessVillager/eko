@@ -4,14 +4,14 @@ export async function getWindowId(context: ExecutionContext): Promise<number> {
   let windowId = context.variables.get('windowId') as any;
   if (windowId) {
     try {
-      await chrome.windows.get(windowId);
+      await context.ekoConfig.chromeProxy.windows.get(windowId);
     } catch (e) {
       windowId = null;
       context.variables.delete('windowId');
       let tabId = context.variables.get('tabId') as any;
       if (tabId) {
         try {
-          let tab = await chrome.tabs.get(tabId);
+          let tab = await context.ekoConfig.chromeProxy.tabs.get(tabId);
           windowId = tab.windowId;
         } catch (e) {
           context.variables.delete('tabId');
@@ -20,7 +20,7 @@ export async function getWindowId(context: ExecutionContext): Promise<number> {
     }
   }
   if (!windowId) {
-    const window = await chrome.windows.getCurrent();
+    const window = await context.ekoConfig.chromeProxy.windows.getCurrent();
     windowId = window.id;
   }
   return windowId as number;
@@ -30,7 +30,7 @@ export async function getTabId(context: ExecutionContext): Promise<number> {
   let tabId = context.variables.get('tabId') as any;
   if (tabId) {
     try {
-      await chrome.tabs.get(tabId);
+      await context.ekoConfig.chromeProxy.tabs.get(tabId);
     } catch (e) {
       tabId = null;
       context.variables.delete('tabId');
@@ -60,6 +60,7 @@ export async function getTabId(context: ExecutionContext): Promise<number> {
 }
 
 export function getCurrentTabId(windowId?: number | undefined): Promise<number | undefined> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   return new Promise((resolve, reject) => {
     chrome.tabs.query({ windowId, active: true, lastFocusedWindow: true }, function (tabs) {
       if (chrome.runtime.lastError) {
@@ -93,6 +94,7 @@ export async function open_new_tab(
   newWindow: boolean,
   windowId?: number
 ): Promise<chrome.tabs.Tab> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   let tabId;
   if (newWindow) {
     let window = await chrome.windows.create({
@@ -125,6 +127,7 @@ export async function open_new_tab(
 }
 
 export async function executeScript(tabId: number, func: any, args: any[]): Promise<any> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   let frameResults = await chrome.scripting.executeScript({
     target: { tabId: tabId as number },
     func: func,
@@ -137,6 +140,7 @@ export async function waitForTabComplete(
   tabId: number,
   timeout: number = 15_000
 ): Promise<chrome.tabs.Tab> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   return new Promise(async (resolve, reject) => {
     let tab = await chrome.tabs.get(tabId);
     if (tab.status === 'complete') {
@@ -159,6 +163,7 @@ export async function waitForTabComplete(
 }
 
 export async function doesTabExists(tabId: number) {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   const tabExists = await new Promise((resolve) => {
     chrome.tabs.get(tabId, (tab) => {
       if (chrome.runtime.lastError) {
@@ -172,6 +177,7 @@ export async function doesTabExists(tabId: number) {
 }
 
 export async function getPageSize(tabId?: number): Promise<[number, number]> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   if (!tabId) {
     tabId = await getCurrentTabId();
   }
@@ -190,6 +196,7 @@ export function sleep(time: number): Promise<void> {
 }
 
 export async function injectScript(tabId: number, filename?: string) {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   let files = ['eko/script/common.js'];
   if (filename) {
     files.push('eko/script/' + filename);

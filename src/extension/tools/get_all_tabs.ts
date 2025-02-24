@@ -17,9 +17,9 @@ export class GetAllTabs implements Tool<any, BrowserTab[]> {
   }
 
   async execute(context: ExecutionContext, params: any): Promise<BrowserTab[]> {
-    const currentWindow = await chrome.windows.getCurrent();
+    const currentWindow = await context.ekoConfig.chromeProxy.windows.getCurrent();
     const windowId = currentWindow.id;
-    const tabs = await chrome.tabs.query({ windowId });
+    const tabs = await context.ekoConfig.chromeProxy.tabs.query({ windowId });
     const tabsInfo: BrowserTab[] = [];
   
     for (const tab of tabs) {

@@ -2,6 +2,7 @@ import * as tools from './tools';
 import { Tool } from '../types';
 
 export async function pub(tabId: number, event: string, params: any): Promise<any> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   return await chrome.tabs.sendMessage(tabId as number, {
     type: 'eko:message',
     event,
@@ -15,6 +16,7 @@ export async function getLLMConfig(name: string = 'llmConfig'): Promise<{
   modelName?: string;
   options?: {[key:string]:any};
 } | undefined> {
+  // TODO: replace `chrome` with `context.ekoConfig.chromeProxy`
   let result = await chrome.storage.sync.get([name]);
   return result[name];
 }
