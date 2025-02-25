@@ -60,6 +60,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
             'extract_content',
             'get_dropdown_options',
             'select_dropdown_option',
+            'screenshot_no_extract_element',
           ],
         },
         index: {
@@ -243,6 +244,23 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
             return (window as any).remove_highlight();
           });
           result = { image: image, text: element_result.element_str };
+          break;
+        case 'screenshot_no_extract_element':
+          await sleep(100);
+          await this.injectScript(page);
+          await sleep(100);
+          let screenshotBufferNoHighlight = await page.screenshot({
+            fullPage: false,
+            type: 'jpeg',
+            quality: 50,
+          });
+          let base64_no_highlight = screenshotBufferNoHighlight.toString('base64');
+          let image_no_highlight = {
+            type: 'base64',
+            media_type: 'image/jpeg',
+            data: base64_no_highlight,
+          }
+          result = { image: image_no_highlight, text: "" };
           break;
         default:
           throw Error(
