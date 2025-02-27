@@ -36,13 +36,20 @@ export class HumanInputText implements Tool<HumanInputTextInput, HumanInputTextR
     }
     const question = params.question;
     console.log("question: " + question);
-    let answer = await context.callback?.hooks.onHumanInputText?.(question);
-    if (!answer) {
-      console.error("Cannot get user's answer.");
-      return {status: "Error: Cannot get user's answer.", answer: ""};
-    } else {
+    let onHumanInputText = context.callback?.hooks.onHumanInputText;
+    if (onHumanInputText) {
+      let answer;
+      try {
+        answer = await onHumanInputText(question);
+      } catch (e) {
+        console.error(e);
+        return {status: "Error: Cannot get user's answer.", answer: ""};
+      }
       console.log("answer: " + answer);
       return {status: "OK", answer: answer};
+    } else {
+      console.error("`onHumanInputText` not implemented");
+      return {status: "Error: Cannot get user's answer.", answer: ""};
     }
   }
 }
@@ -79,13 +86,20 @@ export class HumanInputSingleChoice implements Tool<HumanInputSingleChoiceInput,
     const choices = params.choices;
     console.log("question: " + question);
     console.log("choices: " + choices);
-    let answer = await context.callback?.hooks.onHumanInputSingleChoice?.(question, choices);
-    if (!answer) {
-      console.error("Cannot get user's answer.");
-      return {status: "Error: Cannot get user's answer.", answer: ""};
-    } else {
+    let onHumanInputSingleChoice = context.callback?.hooks.onHumanInputSingleChoice;
+    if (onHumanInputSingleChoice) {
+      let answer;
+      try {
+        answer = await onHumanInputSingleChoice(question, choices);
+      } catch (e) {
+        console.error(e);
+        return {status: "Error: Cannot get user's answer.", answer: ""};
+      }
       console.log("answer: " + answer);
       return {status: "OK", answer: answer};
+    } else {
+      console.error("`onHumanInputSingleChoice` not implemented");
+      return {status: "Error: Cannot get user's answer.", answer: ""};
     }
   }
 }
@@ -122,13 +136,20 @@ export class HumanInputMultipleChoice implements Tool<HumanInputMultipleChoiceIn
     const choices = params.choices;
     console.log("question: " + question);
     console.log("choices: " + choices);
-    let answer = await context.callback?.hooks.onHumanInputMultipleChoice?.(question, choices);
-    if (!answer) {
-      console.error("Cannot get user's answer.");
-      return {status: "Error: Cannot get user's answer.", answer: []};
-    } else {
+    let onHumanInputMultipleChoice = context.callback?.hooks.onHumanInputMultipleChoice;
+    if (onHumanInputMultipleChoice) {
+      let answer;
+      try {
+        answer = await onHumanInputMultipleChoice(question, choices)
+      } catch (e) {
+        console.error(e);
+        return {status: "`onHumanInputMultipleChoice` not implemented", answer: []};
+      }
       console.log("answer: " + answer);
       return {status: "OK", answer: answer};
+    } else {
+      console.error("Cannot get user's answer.");
+      return {status: "Error: Cannot get user's answer.", answer: []};
     }
   }
 }
@@ -140,7 +161,7 @@ export class HumanOperate implements Tool<HumanOperateInput, HumanOperateResult>
 
   constructor() {
     this.name = 'human_operate';
-    this.description = 'When you encounter operations that require login, CAPTCHA verification, or other tasks that you cannot complete, please call this tool, transfer control to the user, and explain why.';
+    this.description = 'When you encounter operations necessitating login, CAPTCHA verification, or any other tasks beyond your reach, kindly invoke this tool, relinquish control to the user, and elucidate the reasons behind this action.\n\nBefore executing the final step of any task that entails external repercussions, such as submitting purchases, deleting entries, editing data, scheduling appointments, sending messages, managing accounts, moving files, and the like, seek the user\'s definitive confirmation.';
     this.input_schema = {
       type: 'object',
       properties: {
@@ -159,13 +180,20 @@ export class HumanOperate implements Tool<HumanOperateInput, HumanOperateResult>
     }
     const reason = params.reason;
     console.log("reason: " + reason);
-    let userOperation = await context.callback?.hooks.onHumanOperate?.(reason);
-    if (!userOperation) {
-      console.error("Cannot get user's operation.");
-      return {status: "Error: Cannot get user's operation.", userOperation: ""};
-    } else {
+    let onHumanOperate = context.callback?.hooks.onHumanOperate;
+    if (onHumanOperate) {
+      let userOperation;
+      try {
+        userOperation = await onHumanOperate(reason);
+      } catch (e) {
+        console.error(e);
+        return {status: "`onHumanOperate` not implemented", userOperation: ""};
+      }
       console.log("userOperation: " + userOperation);
       return {status: "OK", userOperation: userOperation};
+    } else {
+      console.error("Cannot get user's operation.");
+      return {status: "Error: Cannot get user's operation.", userOperation: ""};
     }
   }
 }

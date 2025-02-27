@@ -1,6 +1,8 @@
 import { Action, ExecutionContext, Tool } from "./action.types";
 import { LLMProvider } from "./llm.types";
 import { ExecutionLogger } from "@/utils/execution-logger";
+import { ExportFileParam } from "./tools.types";
+import { WorkflowResult } from "./eko.types";
 
 export interface NodeOutput {
   name: string;
@@ -31,7 +33,7 @@ export interface Workflow {
   llmProvider?: LLMProvider;
 
   setLogger(logger: ExecutionLogger): void;
-  execute(callback?: WorkflowCallback): Promise<NodeOutput[]>;
+  execute(callback?: WorkflowCallback): Promise<WorkflowResult>;
   cancel(): Promise<void>;
   addNode(node: WorkflowNode): void;
   removeNode(nodeId: string): void;
@@ -54,5 +56,6 @@ export interface WorkflowCallback {
     onHumanInputMultipleChoice?: (question: string, choices: string[]) => Promise<string[]>;
     onHumanOperate?: (reason: string) => Promise<string>;
     onSummaryWorkflow?: (summary: string) => Promise<void>;
+    onExportFile?: (param: ExportFileParam) => Promise<void>;
   }
 };

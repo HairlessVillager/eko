@@ -19,6 +19,10 @@ export class WorkflowGenerator {
     return this.doGenerateWorkflow(prompt, false, ekoConfig);
   }
 
+  async generateWorkflowFromJson(json: any, ekoConfig: EkoConfig): Promise<Workflow> {
+    return this.createWorkflowFromData(json, ekoConfig);
+  }
+
   async modifyWorkflow(prompt: string, ekoConfig: EkoConfig): Promise<Workflow> {
     return this.doGenerateWorkflow(prompt, true, ekoConfig);
   }
@@ -87,20 +91,26 @@ export class WorkflowGenerator {
 
     const workflowData = response.toolCalls[0].input.workflow as any;
 
-    // Forcibly add special tools
-    const specialTools = [
-      "cancel_workflow",
-      "human_input_text",
-      "human_operate",
-    ]
-    for (const node of workflowData.nodes) {
-      for (const tool of specialTools) {
-        if (!node.action.tools.includes(tool)) {
-          node.action.tools.push(tool);
-        }
-      }
-    }
+    // debug
+    console.log("Debug the workflow...")
+    console.log({ ...workflowData});
 
+    // Add workflow summary subtask
+    (workflowData.nodes as any[]).push({
+      "id": "final",
+      "type": "action",
+      "dependencies": workflowData.nodes.map((node: { id: any; }) => node.id),
+      "action": {
+        "type": "prompt",
+        "name": "Summarize the workflow.",
+        "description": "Summarize briefly what this workflow has accomplished. Your summary should be based on user\'s original query.",
+        "tools": [
+          "summary_workflow"
+        ]
+      },
+    })
+    console.log("Debug the workflow...Done")    
+    
     // Validate all tools exist
     for (const node of workflowData.nodes) {
       if (!this.toolRegistry.hasTools(node.action.tools)) {
@@ -113,11 +123,6 @@ export class WorkflowGenerator {
       workflowData.id = uuidv4();
     }
 
-    // debug
-    console.log("Debug the workflow...")
-    console.log(workflowData);
-    console.log("Debug the workflow...Done")    
-    
     return this.createWorkflowFromData(workflowData, ekoConfig);
   }
 
