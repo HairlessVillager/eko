@@ -385,10 +385,10 @@ export async function cursor_position(chromeProxy: any, tabId: number): Promise<
   }
 }
 
-export async function size(tabId?: number): Promise<[number, number]> {
+export async function size(chromeProxy: any, tabId?: number): Promise<[number, number]> {
   console.log('Getting page size for tab:', tabId);
   try {
-    const pageSize = await getPageSize(tabId);
+    const pageSize = await getPageSize(chromeProxy, tabId);
     console.log('Got page size:', pageSize);
     return pageSize;
   } catch (e) {

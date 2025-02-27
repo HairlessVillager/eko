@@ -284,7 +284,7 @@ async function doPageContent(
             tabsUpdateEvent.removeListener(eventId);
             try {
               // Inject script and get page content
-              await injectScript(tab.id as number, filename);
+              await injectScript(context.ekoConfig.chromeProxy, tab.id as number, filename);
               await sleep(1000);
 
               let result: any = await context.ekoConfig.chromeProxy.tabs.sendMessage(tab.id as number, {
