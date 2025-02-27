@@ -22,7 +22,7 @@
  * In this example, `tabs_get` is a mock implementation that logs the `tabId` before calling the original `chrome.tabs.get` method, and the same as `chrome.windows.create` method.
  */
 export function createChromeApiProxy(mockClass: any): any {
-  console.log("debug mockClass:")
+  console.log("debug mockClass:");
   console.log(mockClass);
 
   return new Proxy(chrome, {
@@ -44,15 +44,19 @@ export function createChromeApiProxy(mockClass: any): any {
                   // Otherwise, return the original Chrome API method
                   return targetProp[method];
                 }
+              } else {
+                return targetProp[method];
               }
-              return undefined;
             }
           });
+        } else {
+          // For other properties, return the original Chrome property
+          return target[prop];
         }
+      } else {
+        // If the property is not a string, return the original property
+        return target[prop];
       }
-      // For other properties, return the original Chrome property
-      return target[prop as string]; // Use type assertion to avoid compilation errors
     }
   });
 }
-
