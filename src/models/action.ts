@@ -109,7 +109,9 @@ export class ActionImpl implements Action {
       },
       onToolUse: async (toolCall) => {
         this.logger.log('info', `Assistant: ${assistantTextMessage}`);
+        await context.callback?.hooks.logAssistantReasoning?.(assistantTextMessage);
         this.logger.logToolExecution(toolCall.name, toolCall.input, context);
+        await context.callback?.hooks.logToolUsing?.(toolCall.name);
         hasToolUse = true;
 
         const tool = toolMap.get(toolCall.name);
@@ -390,6 +392,9 @@ export class ActionImpl implements Action {
       if (!hasToolUse && response) {
         // LLM sent a message without using tools - request explicit return
         this.logger.log('info', `Assistant: ${response.textContent}`);
+        if (response.textContent) {
+          await context.callback?.hooks.logAssistantReasoning?.(response.textContent);
+        }
         this.logger.log('warn', 'LLM sent a message without using tools; requesting explicit return');
         const returnOnlyParams = {
           ...params,
