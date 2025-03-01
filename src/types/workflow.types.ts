@@ -57,5 +57,8 @@ export interface WorkflowCallback {
     onHumanOperate?: (reason: string) => Promise<string>;
     onSummaryWorkflow?: (summary: string) => Promise<void>;
     onExportFile?: (param: ExportFileParam) => Promise<void>;
+    logAssistantReasoning?: (reasoning: string) => Promise<void>;
+    logToolUsing?: (toolName: string) => Promise<void>;
+    logToolUsingDetail?: (toolName: string, detail: string) => Promise<void>;
   }
 };
