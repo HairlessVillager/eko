@@ -100,6 +100,7 @@ export class ExportFile implements Tool<ExportFileParam, unknown> {
       await sleep(5000);
       await context.ekoConfig.chromeProxy.tabs.remove(tabId);
     }
+    await context.callback?.hooks.logToolUsingDetail?.(this.name, `file exported, press 'Ctrl+J' open the 'Downloads'`);
     return { success: true };
   }
 }

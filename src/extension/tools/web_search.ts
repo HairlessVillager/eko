@@ -48,7 +48,11 @@ export class WebSearch implements Tool<WebSearchParam, WebSearchResult[]> {
     }
     let taskId = new Date().getTime() + '';
     let searchs = [{ url: url as string, keyword: query as string }];
-    let searchInfo = await deepSearch(context, taskId, searchs, maxResults || 5, context.ekoConfig.workingWindowId);
+    let detailsMaxNum = maxResults || 5
+    await context.callback?.hooks.logToolUsingDetail?.(this.name, `search engine: "${url}"`);
+    await context.callback?.hooks.logToolUsingDetail?.(this.name, `search query: "${query}"`);
+    await context.callback?.hooks.logToolUsingDetail?.(this.name, `search items: "${detailsMaxNum}"`);
+    let searchInfo = await deepSearch(context, taskId, searchs, detailsMaxNum, context.ekoConfig.workingWindowId);
     let links = searchInfo.result[0]?.links || [];
     return links.filter((s: any) => s.content) as WebSearchResult[];
   }

@@ -81,6 +81,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
       if (params === null || !params.action) {
         throw new Error('Invalid parameters. Expected an object with a "action" property.');
       }
+      await context.callback?.hooks.logToolUsingDetail?.(this.name, `action: ${params.action}`);
       let tabId: number;
       try {
         tabId = await getTabId(context);
@@ -109,6 +110,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           if (params.text == null) {
             throw new Error('text parameter is required');
           }
+          await context.callback?.hooks.logToolUsingDetail?.(this.name, `typing text: ${params.text}`);
           await browser.clear_input_by(context.ekoConfig.chromeProxy, tabId, selector_xpath, params.index);
           result = await browser.type_by(context.ekoConfig.chromeProxy, tabId, params.text, selector_xpath, params.index);
           await sleep(200);
@@ -143,6 +145,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           break;
         case 'extract_content':
           let tab = await context.ekoConfig.chromeProxy.tabs.get(tabId);
+          await context.callback?.hooks.logToolUsingDetail?.(this.name, `extract the page content, wait a second...`);
           await injectScript(context.ekoConfig.chromeProxy, tabId);
           await sleep(200);
           let content = await executeScript(context.ekoConfig.chromeProxy, tabId, () => {
@@ -177,6 +180,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           break;
         case 'screenshot_extract_element':
           console.log("execute 'screenshot_extract_element'...");
+          await context.callback?.hooks.logToolUsingDetail?.(this.name, `highlight the clickable elements...`);
           await sleep(100);
           console.log("injectScript...");
           await injectScript(context.ekoConfig.chromeProxy, tabId, 'build_dom_tree.js');
@@ -187,8 +191,10 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           }, []);
           context.selector_map = element_result.selector_map;
           console.log("browser.screenshot...");
+          await context.callback?.hooks.logToolUsingDetail?.(this.name, `screenshot...`);
           let screenshot = await browser.screenshot(context.ekoConfig.chromeProxy, windowId, true);
           console.log("executeScript #2...");
+          await context.callback?.hooks.logToolUsingDetail?.(this.name, `remove highlight...`);
           await executeScript(context.ekoConfig.chromeProxy, tabId, () => {
             return (window as any).remove_highlight();
           }, []);
