@@ -39,9 +39,9 @@ export interface EkoInvokeParam {
 }
 
 export interface WorkflowResult {
-  isSuccessful: boolean,
-  summary: string,
-  payload: WorkflowTranscript | WorkflowArtifact,
+  isSuccessful?: boolean,
+  summary?: string,
+  payload?: WorkflowTranscript | WorkflowArtifact,
 }
 
 export type WorkflowTranscript = string

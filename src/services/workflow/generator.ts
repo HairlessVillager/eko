@@ -116,6 +116,7 @@ export class WorkflowGenerator {
       data.id,
       data.name,
       ekoConfig,
+      data,
       data.description || '',
       [],
       new Map(Object.entries(data.variables || {})),
