@@ -14,8 +14,9 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
   private browser: Browser | null = null;
   private browser_context: BrowserContext | null = null;
   private current_page: Page | null = null;
+  private browserOptions: any;
 
-  constructor() {
+  constructor( browserOptions : any ) {
     this.name = 'browser_use';
     this.description = `Use structured commands to interact with the browser, manipulating page elements through screenshots and webpage element extraction.
 * This is a browser GUI interface where you need to analyze webpages by taking screenshots and extracting page element structures, and specify action sequences to complete designated tasks.
@@ -59,6 +60,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
             'extract_content',
             'get_dropdown_options',
             'select_dropdown_option',
+            'screenshot_no_extract_element',
           ],
         },
         index: {
@@ -73,6 +75,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
       },
       required: ['action'],
     };
+    this.browserOptions = browserOptions;
   }
 
   /**
@@ -242,6 +245,23 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
           });
           result = { image: image, text: element_result.element_str };
           break;
+        case 'screenshot_no_extract_element':
+          await sleep(100);
+          await this.injectScript(page);
+          await sleep(100);
+          let screenshotBufferNoHighlight = await page.screenshot({
+            fullPage: false,
+            type: 'jpeg',
+            quality: 50,
+          });
+          let base64_no_highlight = screenshotBufferNoHighlight.toString('base64');
+          let image_no_highlight = {
+            type: 'base64',
+            media_type: 'image/jpeg',
+            data: base64_no_highlight,
+          }
+          result = { image: image_no_highlight, text: "" };
+          break;
         default:
           throw Error(
             `Invalid parameters. The "${params.action}" value is not included in the "action" enumeration.`
@@ -262,10 +282,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
     if (!this.browser) {
       this.current_page = null;
       this.browser_context = null;
-      this.browser = await chromium.launch({
-        headless: false,
-        args: ['--no-sandbox'],
-      });
+      this.browser = await chromium.launch(this.browserOptions);
     }
     if (!this.browser_context) {
       this.current_page = null;
@@ -274,7 +291,7 @@ export class BrowserUse implements Tool<BrowserUseParam, BrowserUseResult> {
     const page: Page = await this.browser_context.newPage();
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto(url, {
-      waitUntil: 'networkidle',
+      waitUntil: 'domcontentloaded',
       timeout: 15000,
     });
     await page.waitForLoadState('load');

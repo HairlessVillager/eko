@@ -108,6 +108,11 @@ export class WorkflowGenerator {
       workflowData.id = uuidv4();
     }
 
+    // debug
+    console.log("Debug the workflow...")
+    console.log(workflowData);
+    console.log("Debug the workflow...Done")
+
     return this.createWorkflowFromData(workflowData, ekoConfig);
   }
 
