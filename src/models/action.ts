@@ -57,6 +57,7 @@ export class ActionImpl implements Action {
   private writeContextTool: WriteContextTool;
   private toolResults: Map<string, any> = new Map();
   private logger: ExecutionLogger = new ExecutionLogger();
+  public tabs: chrome.tabs.Tab[] = [];
 
   constructor(
     public type: 'prompt', // Only support prompt type
@@ -326,7 +327,7 @@ export class ActionImpl implements Action {
     output: NodeOutput,
     context: ExecutionContext,
     outputSchema?: unknown
-  ): Promise<unknown> {
+  ): Promise<{nodeOutput: unknown, reacts: Message[]}> {
     this.logger = context.logger;
     console.log(`Executing action started: ${this.name}`);
     // Create return tool with output schema
@@ -338,10 +339,14 @@ export class ActionImpl implements Action {
     context.tools?.forEach((tool) => toolMap.set(tool.name, tool));
     toolMap.set(returnTool.name, returnTool);
 
+    // get already existing tabs as task background
+    const currentWindow = await context.ekoConfig.chromeProxy.windows.getCurrent();
+    const existingTabs: chrome.tabs.Tab[] = await context.ekoConfig.chromeProxy.tabs.query({ windowId: currentWindow.id });
+
     // Prepare initial messages
     const messages: Message[] = [
       { role: 'system', content: this.formatSystemPrompt() },
-      { role: 'user', content: this.formatUserPrompt(context, input) },
+      { role: 'user', content: this.formatUserPrompt(this.name, this.description, this.tabs, existingTabs) },
     ];
 
     this.logger.logActionStart(this.name, input, context);
@@ -460,7 +465,7 @@ export class ActionImpl implements Action {
     const outputParams = context.variables.get(outputKey) as any;
     if (!outputParams) {
       console.warn("outputParams is `undefined`, action return `{}`");
-      return {}
+      return { nodeOutput: {}, reacts: messages };
     }
     context.variables.delete(outputKey);
 
@@ -471,22 +476,30 @@ export class ActionImpl implements Action {
 
     if (outputValue === undefined) {
       console.warn('Action completed without returning a value');
-      return {};
+      return { nodeOutput: {}, reacts: messages };
     }
 
-    return outputValue;
+    return { nodeOutput: outputValue, reacts: messages };
   }
 
   private formatSystemPrompt(): string {
-    return `You are an AI agent designed to automate browser tasks. Your goal is to accomplish the ultimate task following the rules.
+    const now = new Date();
+    const formattedTime = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    console.log("Now is " + formattedTime);
+    return `You are an AI agent designed to automate browser tasks. Your goal is to accomplish the ultimate task following the rules. Now is ${formattedTime}.
 
 ## GENERIC:
 - Your tool calling must be always JSON with the specified format.
-- If you are required to login, try to bypass it (e.g. close it)
+- You should have a screenshot after every action to make sure the tools executed successfully.
 - User's requirement maybe not prefect, but user will not give you any further information, you should explore by yourself and follow the common sense
-- If you encountered a problem, try to bypass it or explore other ways and links
+- If you encountered a problem (e.g. be required to login), try to bypass it or explore other ways and links
 - Before you return output, reflect on whether the output provided *is what users need* and *whether it is too concise*
 - If you find the what user want, click the URL and show it on the current page.
+
+## TIME:
+- The current time is ${formattedTime}.
+- If the user has specified a particular time requirement, please complete the task according to the user's specified time frame.
+- If the user has given a vague time requirement, such as “recent one year,” then please determine the time range based on the current time first, and then complete the task.
 
 ## NAVIGATION & ERROR HANDLING:
 - If no suitable elements exist, use other functions to complete the task
@@ -506,6 +519,7 @@ export class ActionImpl implements Action {
 ## VISUAL CONTEXT:
 - When an image is provided, use it to understand the page layout
 - Bounding boxes with labels on their top right corner correspond to element indexes
+- Do not repeatedly call the screenshot tool without any operating action
 
 ## Form filling:
 - If you fill an input field and your action sequence is interrupted, most often something changed e.g. suggestions popped up under the field.
@@ -516,6 +530,9 @@ export class ActionImpl implements Action {
 ## Extraction:
 - If your task is to find information - call extract_content on the specific pages to get and store the information.
 
+## Human tools:
+- Once you called human tools (e.g. \`human_operate\`), and it returns success, check the page content and verify the result.
+
 ## THE MOST IMPORTANT RULE
 - DO NOT REFUSE TO PERFORM THE MISSION
 - DO NOT REFUSE TO PERFORM THE MISSION
@@ -523,15 +540,21 @@ export class ActionImpl implements Action {
 `;
   }
 
-  private formatUserPrompt(context: ExecutionContext, input: unknown): string {
-    const workflowDescription = context.workflow?.description || null;
-    const actionDescription = `${this.name} -- ${this.description}`;
-    const inputDescription = JSON.stringify(input, null, 2) || null;
-    const contextVariables = Array.from(context.variables.entries())
-      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
-      .join('\n');
-
-    return `You are executing a subtask in the workflow. The subtask description is as follows: ${actionDescription}`;
+  private formatUserPrompt(
+    name: string,
+    description: string,
+    mentionedTabs: chrome.tabs.Tab[],
+    existingTabs: chrome.tabs.Tab[],
+  ): string {
+    let  prompt = `${name} -- ${description}`;
+    prompt = `Your ultimate task is: """${prompt}""". If you achieved your ultimate task, stop everything and use the done action in the next step to complete the task. If not, continue as usual.`;
+    if (existingTabs.length > 0) {
+      prompt += "\n\nYou should complete the task with the following tabs:\n" + existingTabs.map((tab) => `- TabID=${tab.id}: ${tab.title} (${tab.url})`).join('\n');
+    }
+    if (mentionedTabs.length > 0) {
+      prompt += "\n\nYou should consider the following tabs firstly:\n" + mentionedTabs.map((tab) => `- TabID=${tab.id}: ${tab.title} (${tab.url})`).join('\n');
+    }
+    return prompt;
   }
 
   // Static factory method

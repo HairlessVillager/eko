@@ -34,7 +34,6 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
 * \`tab_all\`: View all tabs and return the tabId and title.
 * \`current_tab\`: Get current tab information (tabId, url, title).
 * \`go_back\`: Go back to the previous page in the current tab.
-* \`change_url [url]\`: open URL in the current tab, eg: \`change_url https://www.google.com\`.
 * \`close_tab\`: Close the current tab.
 * \`switch_tab [tabId]\`: Switch to the specified tab using tabId, eg: \`switch_tab 1000\`.
 * \`new_tab [url]\`: Open a new tab window and open the URL, eg: \`new_tab https://www.google.com\``,
@@ -47,7 +46,7 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
   /**
    * Tab management
    *
-   * @param {*} params { command: `new_tab [url]` | 'tab_all' | 'current_tab' | 'go_back' | 'close_tab' | 'switch_tab [tabId]' | `change_url [url]` }
+   * @param {*} params { command: `new_tab [url]` | 'tab_all' | 'current_tab' | 'go_back' | 'close_tab' | 'switch_tab [tabId]'  }
    * @returns > { result, success: true }
    */
   async execute(
@@ -117,18 +116,8 @@ export class TabManagement implements Tool<TabManagementParam, TabManagementResu
       context.variables.set('windowId', tab.windowId);
       let tabInfo: TabInfo = { tabId, windowId: tab.windowId, title: tab.title, url: tab.url };
       result = tabInfo;
-    } else if (command.startsWith('change_url')) {
-      let url = command.substring('change_url'.length).replace('[', '').replace(']', '').trim();
-      let tabId = await getTabId(context);
-      // await chrome.tabs.update(tabId, { url: url });
-      await executeScript(context.ekoConfig.chromeProxy, tabId, () => {
-        location.href = url;
-      }, []);
-      let tab = await waitForTabComplete(context.ekoConfig.chromeProxy, tabId);
-      let tabInfo: TabInfo = { tabId, windowId: tab.windowId, title: tab.title, url: tab.url };
-      result = tabInfo;
     } else if (command.startsWith('new_tab')) {
-      let url = command.replace('new_tab', '').replace('[', '').replace(']', '').replace(/"/g, '');
+      let url = command.replace('new_tab', '').replace('[', '').replace(']', '').replace(/"/g, '').trim();
       // First mandatory opening of a new window
       let newWindow = !context.variables.get('windowId') && !context.variables.get('tabId');
       let tab: chrome.tabs.Tab;

@@ -127,7 +127,7 @@ export interface HumanInputTextResult {
 
 export interface HumanInputSingleChoiceInput {
   question: string;
-  choices: string[];
+  choices: {choice: string}[];
 }
 
 export interface HumanInputSingleChoiceResult {
@@ -137,7 +137,7 @@ export interface HumanInputSingleChoiceResult {
 
 export interface HumanInputMultipleChoiceInput {
   question: string;
-  choices: string[];
+  choices: {choice: string}[];
 }
 
 export interface HumanInputMultipleChoiceResult {
@@ -157,6 +157,7 @@ export interface HumanOperateResult {
 export interface WorkflowSummary {
   isSuccessful: boolean,
   summary: string,
+  payload: string | undefined,
 }
 
 export interface DocumentAgentToolInput {

@@ -23,7 +23,9 @@ export class Eko {
   private ekoConfig: EkoConfig;
   private toolRegistry = new ToolRegistry();
   private workflowGeneratorMap = new Map<Workflow, WorkflowGenerator>();
-  private prompt: string = "";
+  public prompt: string = "";
+  public tabs: chrome.tabs.Tab[] = [];
+  public workflow?: Workflow = undefined;
 
   constructor(llmConfig: LLMConfig, ekoConfig?: EkoConfig) {
     console.info("using Eko@" + process.env.COMMIT_HASH);
@@ -78,8 +80,9 @@ export class Eko {
     tools.forEach(tool => this.toolRegistry.registerTool(tool));
   }
 
-  public async generate(prompt: string, param?: EkoInvokeParam): Promise<Workflow> {
+  public async generate(prompt: string, tabs: chrome.tabs.Tab[] = [], param?: EkoInvokeParam): Promise<Workflow> {
     this.prompt = prompt;
+    this.tabs = tabs;
     let toolRegistry = this.toolRegistry;
     if (param && param.tools && param.tools.length > 0) {
       toolRegistry = new ToolRegistry();
@@ -95,10 +98,14 @@ export class Eko {
     const generator = new WorkflowGenerator(this.llmProvider, toolRegistry);
     const workflow = await generator.generateWorkflow(prompt, this.ekoConfig);
     this.workflowGeneratorMap.set(workflow, generator);
-    return workflow;  }
+    console.log("the workflow returned by generate");
+    console.log(workflow);
+    this.workflow = workflow;
+    return workflow;
+  }
 
   public async execute(workflow: Workflow): Promise<WorkflowResult> {
-    let prompt = `Your ultimate task is: """${this.prompt}""". If you achieved your ultimate task, stop everything and use the done action in the next step to complete the task. If not, continue as usual.`;
+    let prompt = this.prompt;
     const json = {
       "id": "workflow_id",
       "name": prompt,
@@ -115,16 +122,17 @@ export class Eko {
               "browser_use",
               "cancel_workflow",
               "document_agent",
-              "element_click",
               "export_file",
               "extract_content",
-              "find_element_position",
               "get_all_tabs",
               "open_url",
-              "request_login",
               "screenshot",
               "tab_management",
-              "web_search"
+              "web_search",
+              "human_input_text",
+              "human_input_single_choice",
+              "human_input_multiple_choice",
+              "human_operate",
             ],
           },
           "dependencies": []
@@ -141,6 +149,7 @@ export class Eko {
     
     const generator = new WorkflowGenerator(this.llmProvider, this.toolRegistry);  
     workflow = await generator.generateWorkflowFromJson(json, this.ekoConfig);
+    this.workflow = workflow;
 
     // Inject LLM provider at workflow level
     workflow.llmProvider = this.llmProvider;
@@ -166,8 +175,12 @@ export class Eko {
     return result;
   }
 
-  public async cancel(workflow: Workflow): Promise<void> {
-    return await workflow.cancel();
+  public async cancel(): Promise<void> {
+    if (this.workflow) {
+      return await this.workflow.cancel();
+    } else {
+      throw Error("`Eko` instance do not have a `workflow` member");
+    }
   }
 
 

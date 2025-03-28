@@ -72,6 +72,14 @@ export class HumanInputSingleChoice implements Tool<HumanInputSingleChoiceInput,
         choices: {
           type: 'array',
           description: 'All of the choices.',
+          items: {
+            type: 'object',
+            properties: {
+              choice: {
+                type: 'string',
+              }
+            }
+          }
         }
       },
       required: ['question', 'choices'],
@@ -83,7 +91,7 @@ export class HumanInputSingleChoice implements Tool<HumanInputSingleChoiceInput,
       throw new Error('Invalid parameters. Expected an object with a "question" and "choices" property.');
     }
     const question = params.question;
-    const choices = params.choices;
+    const choices = params.choices.map((e) => e.choice);
     console.log("question: " + question);
     console.log("choices: " + choices);
     let onHumanInputSingleChoice = context.callback?.hooks.onHumanInputSingleChoice;
@@ -122,6 +130,14 @@ export class HumanInputMultipleChoice implements Tool<HumanInputMultipleChoiceIn
         choices: {
           type: 'array',
           description: 'All of the choices.',
+          items: {
+            type: 'object',
+            properties: {
+              choice: {
+                type: 'string',
+              }
+            }
+          }
         }
       },
       required: ['question', 'choices'],
@@ -133,7 +149,7 @@ export class HumanInputMultipleChoice implements Tool<HumanInputMultipleChoiceIn
       throw new Error('Invalid parameters. Expected an object with a "question" and "choices" property.');
     }
     const question = params.question;
-    const choices = params.choices;
+    const choices = params.choices.map((e) => e.choice);
     console.log("question: " + question);
     console.log("choices: " + choices);
     let onHumanInputMultipleChoice = context.callback?.hooks.onHumanInputMultipleChoice;
